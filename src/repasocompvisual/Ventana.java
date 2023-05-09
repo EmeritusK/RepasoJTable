@@ -5,6 +5,8 @@
 package repasocompvisual;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -24,10 +26,8 @@ public class Ventana extends javax.swing.JFrame {
     public Ventana() {
         initComponents();
         crearModelo();
-        jTPersonas.setModel(modelo);        
+        jTPersonas.setModel(modelo);
     }
-
-    
 
     public void limpiarCampos() {
         jTFCedula.setText(null);
@@ -39,24 +39,49 @@ public class Ventana extends javax.swing.JFrame {
     }
 
     public Personas crearPersona() {
-        if (controlCedula(jTFCedula.getText()) == null) {       
+        if (controlCedula(jTFCedula.getText()) == null) {
             return null;
-        }else{
-        Personas p1 = new Personas(jTFCedula.getText(), jTFNombre.getText(),
-                jTFApellido.getText(), jCBSexo.getSelectedItem().toString(),
-                jCBEstadoCivil.getSelectedItem().toString(), jFTFFecha.getText(),
-                jTFHobbies.getText(), jCBNacionalidad.getSelectedItem().toString(),
-                jTFEstudios.getText());
-            System.out.println("Impresion: " + p1.getFecNac());
-        return p1;
+        } else if (controlDeDatosCompletos() == false) {
+            return null;
+
+        } else {
+            Personas p1 = new Personas(jTFCedula.getText(), jTFNombre.getText(),
+                    jTFApellido.getText(), jCBSexo.getSelectedItem().toString(),
+                    jCBEstadoCivil.getSelectedItem().toString(), jFTFFecha.getText(),
+                    jTFHobbies.getText(), jCBNacionalidad.getSelectedItem().toString(),
+                    jTFEstudios.getText());
+            return p1;
         }
     }
 
+    public void calculoDeEdad() {
+        int edad = 0;
+        String subCa = jFTFFecha.getText().substring(6, 10);
+        Calendar fecha = new GregorianCalendar();
+
+        edad = fecha.get(Calendar.YEAR) - Integer.parseInt(subCa);
+
+        JOptionPane.showMessageDialog(this, "La edad de la persona seleccionada es: " + edad);
+    }
+
     public void borrarFila() {
+        if (jTPersonas.getSelectedRow() < 0) {
+            controlBotonesSinSeleccionDeTabla();
+            return;
+        }
         modelo.removeRow(jTPersonas.getSelectedRow());
     }
 
+    public void controlBotonesSinSeleccionDeTabla() {
+
+        JOptionPane.showMessageDialog(this, "Seleccione una fila de la tabla antes de realizar alguna accion");
+    }
+
     public void editarFila(Personas p1) {
+        if (jTPersonas.getSelectedRow() < 0) {
+            controlBotonesSinSeleccionDeTabla();
+            return;
+        }
         jTPersonas.setValueAt(p1.getCedula(), jTPersonas.getSelectedRow(), 0);
         jTPersonas.setValueAt(p1.getNombre(), jTPersonas.getSelectedRow(), 1);
         jTPersonas.setValueAt(p1.getApellido(), jTPersonas.getSelectedRow(), 2);
@@ -74,9 +99,13 @@ public class Ventana extends javax.swing.JFrame {
         modelo.setColumnIdentifiers(columnas);
     }
 
-    public void controlFechas() {
-        if (jFTFFecha.getText() == null) {
-            JOptionPane.showMessageDialog(this, "Ingrese la fecha, en el formato");
+    public boolean controlDeDatosCompletos() {
+        if (jTFCedula.getText().isEmpty() || jTFNombre.getText().isEmpty() || jTFApellido.getText().isEmpty()
+                || jFTFFecha.getText().isEmpty() || jTFHobbies.getText().isEmpty() || jTFEstudios.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese todos los datos");
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -136,6 +165,8 @@ public class Ventana extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jFTFFecha = new javax.swing.JFormattedTextField();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
         jPBotones = new javax.swing.JPanel();
         jBGuardar = new javax.swing.JButton();
         jBActualizar = new javax.swing.JButton();
@@ -178,7 +209,11 @@ public class Ventana extends javax.swing.JFrame {
 
         jLabel11.setText("Separe sus estudios con un guion \"-\"");
 
-        jFTFFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
+        jFTFFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("M/d/yyyy"))));
+
+        jLabel12.setText("Formato de Ingreso: DD/MM/AAAA Ejemplo: 12/12/2013");
+
+        jLabel13.setText("DIA/MES/AÑO");
 
         javax.swing.GroupLayout jPFormularioLayout = new javax.swing.GroupLayout(jPFormulario);
         jPFormulario.setLayout(jPFormularioLayout);
@@ -188,8 +223,10 @@ public class Ventana extends javax.swing.JFrame {
                 .addGroup(jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPFormularioLayout.createSequentialGroup()
                         .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jFTFFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jFTFFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel12)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPFormularioLayout.createSequentialGroup()
                         .addContainerGap()
@@ -238,6 +275,10 @@ public class Ventana extends javax.swing.JFrame {
                                             .addComponent(jLabel11))))
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addGap(31, 31, 31))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPFormularioLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(194, 194, 194))
         );
         jPFormularioLayout.setVerticalGroup(
             jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -262,10 +303,14 @@ public class Ventana extends javax.swing.JFrame {
                 .addGroup(jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(jCBEstadoCivil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
-                .addGroup(jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(jFTFFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jFTFFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel12)))
                 .addGap(18, 18, 18)
                 .addGroup(jPFormularioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
@@ -319,6 +364,11 @@ public class Ventana extends javax.swing.JFrame {
 
         jBCalcularEdad.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
         jBCalcularEdad.setText("Calcular edad");
+        jBCalcularEdad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBCalcularEdadActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPBotonesLayout = new javax.swing.GroupLayout(jPBotones);
         jPBotones.setLayout(jPBotonesLayout);
@@ -426,6 +476,15 @@ public class Ventana extends javax.swing.JFrame {
         limpiarCampos();
     }//GEN-LAST:event_jBCancelarActionPerformed
 
+    private void jBCalcularEdadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCalcularEdadActionPerformed
+        if (jTPersonas.getSelectedRow() < 0) {
+            controlBotonesSinSeleccionDeTabla();
+            return;
+        }
+
+        calculoDeEdad();
+    }//GEN-LAST:event_jBCalcularEdadActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -474,6 +533,8 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
